@@ -11,13 +11,15 @@ Module offering all expectations from IPG POC
     'author': 'Idealis Consulting',
     'depends': [
         'base',
+        'project',
         'contacts',
         'sale_management',
+        'sale_timesheet',
         'stock',
-        'project'
     ],
     'data': [
-        'views/project_task_type_view.xml'
+        'views/project_task_type_view.xml',
+        'views/stock_move_line_view.xml'
     ],
     'installable': True,
     'auto_install': False,

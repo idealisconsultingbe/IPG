@@ -4,10 +4,34 @@
     <record id="ipg_stock_picking_view_form" model="ir.ui.view">
         <field name="name">ipg.stock.picking.view.form</field>
         <field name="model">stock.picking</field>
-        <field name="inherit_id" ref="studio_customization.odoo_studio_stock_pi_98e16e2f-6082-4979-bbf9-ed32dec66104"/>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='x_studio_test_ids']" position="attributes">
-                <attribute name="domain">[('project_id', '=', sale_order_id.project_id)]</attribute>
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="sale_id" attrs="{}" required="1"/>
+            </xpath>
+            <xpath expr="//field[@name='move_line_ids_without_package']" position="inside">
+                <tree editable="bottom" decoration-muted="(state == 'done' and is_locked == True)" decoration-danger="qty_done&gt;product_uom_qty and state!='done' and parent.picking_type_code != 'incoming'" decoration-success="qty_done==product_uom_qty and state!='done' and not result_package_id">
+                    <field name="product_id" required="1" attrs="{'readonly': ['|', ('state', '=', 'done'), ('move_id', '!=', False)]}"/>
+                    <field name="project_id" invisible="1"/>
+                    <field name="x_studio_test_ids" string="Test" widget="many2many_tags" domain="[('project_id', '=', project_id)]"/>
+                    <field name="company_id" invisible="1"/>
+                    <field name="move_id" invisible="1"/>
+                    <field name="picking_id" invisible="1"/>
+                    <field name="location_id" options="{'no_create': True}" attrs="{'column_invisible': [('parent.picking_type_code', '=', 'incoming')]}" groups="stock.group_stock_multi_locations" domain="[('id', 'child_of', parent.location_id), '|', ('company_id', '=', False), ('company_id', '=', company_id)]"/>
+                    <field name="location_dest_id" options="{'no_create': True}" attrs="{'column_invisible': [('parent.picking_type_code', '=', 'outgoing')]}" groups="stock.group_stock_multi_locations" domain="[('id', 'child_of', parent.location_dest_id), '|', ('company_id', '=', False), ('company_id', '=', company_id)]"/>
+                    <field name="package_id" groups="stock.group_tracking_lot"/>
+                    <field name="result_package_id" groups="stock.group_tracking_lot"/>
+                    <field name="lots_visible" invisible="1"/>
+                    <field name="owner_id" groups="stock.group_tracking_owner" attrs="{'column_invisible': [('parent.picking_type_code', '=', 'incoming')]}"/>
+                    <field name="state" invisible="1"/>
+                    <field name="lot_id" groups="stock.group_production_lot" attrs="{'column_invisible': [('parent.show_lots_text', '=', True)], 'invisible': [('lots_visible', '=', False)]}" context="{'default_product_id': product_id, 'default_company_id': company_id, 'active_picking_id': picking_id}"/>
+                    <field name="lot_name" groups="stock.group_production_lot" attrs="{'column_invisible': [('parent.show_lots_text', '=', False)], 'invisible': [('lots_visible', '=', False)]}" context="{'default_product_id': product_id}"/>
+                    <field name="is_initial_demand_editable" invisible="1"/>
+                    <field name="product_uom_qty" readonly="1" attrs="{'column_invisible': ['|',('parent.immediate_transfer', '=', True),('parent.picking_type_code','=','incoming')]}"/>
+                    <field name="is_locked" invisible="1"/>
+                    <field name="qty_done" attrs="{'readonly': [('state', 'in', ('done', 'cancel')), ('is_locked', '=', True)]}" force_save="1"/>
+                    <field name="product_uom_id" force_save="1" attrs="{'readonly': [('state', '!=', 'draft')]}" groups="uom.group_uom"/>
+                </tree>
             </xpath>
         </field>
     </record>
